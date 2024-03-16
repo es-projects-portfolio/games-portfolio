@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>2048</title>
+
+  <link href="style/main.css" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="meta/apple-touch-icon.png">
+  <link rel="apple-touch-startup-image" href="meta/apple-touch-startup-image-640x1096.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"> <!-- iPhone 5+ -->
+  <link rel="apple-touch-startup-image" href="meta/apple-touch-startup-image-640x920.png"  media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 2)"> <!-- iPhone, retina -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+  <div class="container">
+    <div class="heading">
+      <h1 class="title">2048</h1>
+      <div class="scores-container">
+        <div class="score-container">0</div>
+        <div class="best-container">0</div>
+      </div>
+    </div>
+
+    <div class="above-game">
+      <p class="game-intro">Join the numbers and get to the <strong>2048 tile!</strong></p>
+      <a class="restart-button">New Game</a>
+
+    </div>
+
+    <div class="game-container">
+      <div class="game-message">
+        <p></p>
+        <div class="lower">
+	        <a class="keep-playing-button">Keep going</a>
+          <a class="retry-button">Try again</a>
+        </div>
+      </div>
+
+      <div class="grid-container">
+        <div class="grid-row">
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+        </div>
+        <div class="grid-row">
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+        </div>
+        <div class="grid-row">
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+        </div>
+        <div class="grid-row">
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+        </div>
+      </div>
+
+      <div class="tile-container">
+
+      </div>
+    </div>
+
+    <p class="game-explanation">
+      <a class="claim-button" onclick="sendMessageAndRequestTokens()">Claim Here!  [ <span id="tokens-to-claim"></span> ] </a><br>
+      <strong class="important">How to play:</strong><br><strong>For desktop:</strong> Use your <strong>arrow keys</strong> to move the tiles.
+      <br><strong>For mobile:</strong> Swipe the screen to move the tiles.
+      <br>When two tiles with the same number touch, they <strong>merge into one!</strong>
+    </p>
+    <hr>
+
+    <div class="footing">
+      <div class="leaderboard-container">
+        <h1>Leaderboard</h1>
+        <table id="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>High Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Player and high score data will be inserted here dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/bind_polyfill.js"></script>
+  <script src="js/classlist_polyfill.js"></script>
+  <script src="js/animframe_polyfill.js"></script>
+  <script src="js/keyboard_input_manager.js"></script>
+  <script src="js/html_actuator.js"></script>
+  <script src="js/grid.js"></script>
+  <script src="js/tile.js"></script>
+  <script src="js/local_storage_manager.js"></script>
+  <script src="js/game_manager.js"></script>
+  <script src="js/application.js"></script>
+  <script>
+    function updateClaimButtonVisibility() {
+      const claimButton = document.querySelector('.claim-button');
+      const tokensToClaimSpan = document.getElementById('tokens-to-claim');
+
+      tokensToClaimSpan.textContent = user.amountToClaim.toString();
+
+      if (user.isAvailableToClaim || user.amountToClaim !== 0) {
+        claimButton.style.display = 'block';
+      } else {
+        claimButton.style.display = 'none';
+      }
+    }
+
+    async function sendMessageAndRequestTokens() {
+      try {
+        const messageSent = await SendMessageToParent();
+        if (messageSent) {
+          await tokensRequest();
+          await tokensClaim();
+        } else {
+          console.log('Post message to parent failed. Tokens not requested.');
+        }
+      } catch (error) {
+        console.error('Error sending message and requesting tokens:', error);
+      }
+    }
+
+    async function SendMessageToParent() {
+      return new Promise((resolve, reject) => {
+        try {
+          window.parent.postMessage({ command: 'distributeToken', incrementValue: user.amountToClaim}, 'https://dnaniel213.github.io/');
+          console.log("Wah sent message to parent", {
+            amountToClaim: user.amountToClaim
+          });
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      });
+    }
+
+    async function tokensRequest() {
+      let url = '';
+      var API_URL = "";
+      if (user.main_env) {
+        API_URL = BACKEND_ENDPOINT + user.username;
+      } else {
+        API_URL = BACKEND_ENDPOINT_DEMO + user.username;
+      }
+
+      if (user.eventId == null || user.eventId == undefined) {
+        url = `${API_URL}/highscore/tokensreq?hash=-`
+      } else {
+        url = `${API_URL}/highscore/tokensreq?eventID=${user.eventId}&hash=-`
+      }
+
+      try {
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Result:", data);
+        return data;
+      } catch (error) {
+        console.error('Error updating high score tokens request:', error);
+        return null;
+      }
+    }
+
+    async function tokensClaim() {
+      let url = '';
+      var API_URL = "";
+      if (user.main_env) {
+        API_URL = BACKEND_ENDPOINT + user.username;
+      } else {
+        API_URL = BACKEND_ENDPOINT_DEMO + user.username;
+      }
+
+      if (user.eventId == null || user.eventId == undefined) {
+        url = `${API_URL}/highscore/tokensclaim`
+      } else {
+        url = `${API_URL}/highscore/tokensclaim?eventID=${user.eventId}`
+      }
+
+      try {
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Result:", data);
+        return data;
+      } catch (error) {
+        console.error('Error updating high score tokens claim:', error);
+        return null;
+      }
+    }
+    setInterval(updateClaimButtonVisibility, 1000);
+  </script>
+</body>
+</html>
