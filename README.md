@@ -12,14 +12,14 @@ There are 3 directories:
 ## `html5-games`
 In the beginning of my career, i enjoyed learning javascript. I started to create many games using vanilla javascript and react.
 I only publish 3 games from other games i have created to this repo.
-- [`html5-2048`]('https://github.com/es-projects-portfolio/games-portfolio/tree/main/html5-games/html5-2048') : using only with database service
-- [`html-hextris`]('https://github.com/es-projects-portfolio/games-portfolio/tree/main/html5-games/html5-hextris') : using only with database service
-- [`react-tictactoe-multiplayer`]('https://github.com/es-projects-portfolio/games-react-tictactoe-multiplayer') : integrate the websocket service
+- `html5-2048` [link]('https://github.com/es-projects-portfolio/games-portfolio/tree/main/html5-games/html5-2048') : using only with database service
+- `html-hextris` [link]('https://github.com/es-projects-portfolio/games-portfolio/tree/main/html5-games/html5-hextris') : using only with database service
+- `react-tictactoe-multiplayer` [link]('https://github.com/es-projects-portfolio/games-react-tictactoe-multiplayer') : integrate the websocket service
 
 ## `unity-games`
 Apart of my work I have done, i chose 3 games only to be shared in this repo. All the games were integrated with `metx-games-database-service` and `metx-autosigner`.
 Most of the games were created from scratch and some are open source. The models were mostly taken from unity asset store.
-- [`unity-bot-shooter`]('https://github.com/es-projects-portfolio/games-unity-bot-shooter.git')
-- [`unity-coin-adventure`]('https://github.com/es-projects-portfolio/games-unity-coin-adventure.git')
-- [`unity-super-climber`]('https://github.com/es-projects-portfolio/games-unity-super-climber.git')
+- `unity-bot-shooter` [link]('https://github.com/es-projects-portfolio/games-unity-bot-shooter.git')
+- `unity-coin-adventure` [link]('https://github.com/es-projects-portfolio/games-unity-coin-adventure.git')
+- `unity-super-climber` [link]('https://github.com/es-projects-portfolio/games-unity-super-climber.git')
 
